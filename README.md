@@ -26,9 +26,9 @@ Sample Architecture
   MaxPooling2D (2x2)
 - Flatten
   
-Dense (64 units, ReLU activation)
+   Dense (64 units, ReLU activation)
 
-Dense (number of classes, softmax activation)
+   Dense (number of classes, softmax activation)
 
 ### Model Training
 The model is trained using the Adam or SGD optimizer and sparse_categorical_crossentropy loss function for multi-class classification. The dataset is split into training and testing sets.
