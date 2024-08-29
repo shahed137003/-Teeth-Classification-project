@@ -4,15 +4,24 @@ import tensorflow as tf
 from PIL import Image
 
 # Load your model
-model = tf.keras.models.load_model('teeth_classification.h5')
+
+def load_model():
+  model=tf.keras.models.load_model('teeth_classification.h5')
+  return model
+
+
+@st.cache(allow_output_mutation=True)
+with st.spinner('Model is being loaded..'):
+  model=load_model()
 
 # Streamlit app layout
 st.title('Teeth Classification App')
 
 # Upload image
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
-
-if uploaded_file is not None:
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png"])
+if file is None:
+    st.text("Please upload an image file")
+else:
     # Preprocess image
     image = Image.open(uploaded_file)
     image = image.resize((224, 224))  # Resize to the input size expected by the model
@@ -21,8 +30,9 @@ if uploaded_file is not None:
 
     # Predict
     predictions = model.predict(image_array)
-    predicted_class = np.argmax(predictions, axis=1)[0]
-
+    predicted_class =class_name[ np.argmax(predictions, axis=1)[0]]
+    
     # Display results
     st.image(image, caption='Uploaded Image.', use_column_width=True)
-    st.write(f'Prediction: {predicted_class}')
+    st.write('the predicted type of teeth classification '+predicted_class)
+
