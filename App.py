@@ -1,48 +1,54 @@
 import streamlit as st
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
 import numpy as np
+import tensorflow as tf
 from PIL import Image
+class_name=["CaS","CoS","Gum","MC","OC","OLP","OT"]
+#Load your model
+# Inject custom HTML to set the favicon
+st.markdown(
+    """
+    <link rel="icon" href="https://img.freepik.com/premium-photo/funny-cartoon-character-white-tooth-colorful-background-pediatric-dentistry-stomatology_115128-6000.jpg" type="image/x-icon">
+    """,
+    unsafe_allow_html=True
+)
+st.markdown(
+    """
+    <style>
+    /* Change background color */
+    .stApp {
+        background-color: pink;  /* Light blue background */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# Title and description for the app
-st.title("Teeth Classification Model Deployment")
-st.write("This app classifies teeth based on an image using a pre-trained machine learning model.")
+# Streamlit app layout
+st.markdown("# 🦷 Teeth Classification ")
 
-# Load the saved model
-@st.cache(allow_output_mutation=True)  # Cache the model to avoid reloading on every interaction
-def load_teeth_classification_model():
-    model = load_model('teeth_classification_model.h5')
-    return model
 
-model = load_teeth_classification_model()
+#Load your model
+model = tf.keras.models.load_model('saved_model.h5')
 
-# Upload image using Streamlit's file uploader
-uploaded_file = st.file_uploader("Upload an image of a tooth", type=["jpg", "jpeg", "png"])
+
+# Upload image
+uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
 if uploaded_file is not None:
-    # Show the uploaded image
-    img = Image.open(uploaded_file)
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    # Preprocess image
+    image = Image.open(uploaded_file)
+    image = image.resize((224, 224))  # Resize to the input size expected by the model
+    image_array = np.array(image) / 255.0  # Normalize
+    image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
 
-    # Preprocess the image
-    def preprocess_image(img):
-        img = img.resize((224, 224))  # Resize to match model input shape
-        img_array = image.img_to_array(img)  # Convert image to array
-        img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-        img_array = img_array / 255.0  # Normalize image
-        return img_array
+    # Predict
+    predictions = model.predict(image_array)
+    predicted_class = np.argmax(predictions, axis=1)[0]
 
-    img_preprocessed = preprocess_image(img)
-
-    # Predict using the loaded model
-    predictions = model.predict(img_preprocessed)
-    predicted_class = np.argmax(predictions, axis=1)[0]  # Get the class with the highest probability
-   
-
-    # Display the result
-    st.write(f"Predicted Class: {class_name[predicted_class]}")
-
-    # # Show the prediction probabilities
-    # st.write("Prediction Probabilities:")
-    # for i, prob in enumerate(predictions[0]):
-    #     st.write(f"{class_name[i]}: {prob:.2f}")
+# Display results
+    image = image.resize((128, 128)) 
+    st.image(image, caption='Uploaded Image.', use_column_width=True)
+    if st.button('Predict 🦷'):
+        st.write(f"Predicted Class: {class_name[predicted_class]}")
+        st.success("the prediction is done successfully")
+        st.select_slider("Rate my website plz :smile:",["Bad","Ok","Good","Great","Outstanding"])
